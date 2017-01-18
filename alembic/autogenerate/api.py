@@ -425,6 +425,21 @@ class RevisionContext(object):
         )
         return op
 
+    def generate_script(self, migration_script):
+        generated_revision = self._default_revision()
+
+        self._last_autogen_context = AutogenContext(
+            None, opts={
+                'sqlalchemy_module_prefix': 'sa.',
+                'alembic_module_prefix': 'op.',
+                'user_module_prefix': None,
+            }, autogenerate=False)
+        generated_revision.upgrade_ops = migration_script.upgrade_ops
+        generated_revision.downgrade_ops = migration_script.downgrade_ops
+        generated_revision._needs_render = True
+
+        return self._to_script(generated_revision)
+
     def generate_scripts(self):
         for generated_revision in self.generated_revisions:
             yield self._to_script(generated_revision)

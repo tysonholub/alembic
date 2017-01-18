@@ -68,7 +68,8 @@ def init(config, directory, template='generic'):
 def revision(
         config, message=None, autogenerate=False, sql=False,
         head="head", splice=False, branch_label=None,
-        version_path=None, rev_id=None, depends_on=None):
+        version_path=None, rev_id=None, depends_on=None,
+        migration_script=None):
     """Create a new revision file."""
 
     script_directory = ScriptDirectory.from_config(config)
@@ -116,14 +117,17 @@ def revision(
         ):
             script_directory.run_env()
 
-    scripts = [
-        script for script in
-        revision_context.generate_scripts()
-    ]
-    if len(scripts) == 1:
-        return scripts[0]
+    if migration_script:
+        return revision_context.generate_script(migration_script)
     else:
-        return scripts
+        scripts = [
+            script for script in
+            revision_context.generate_scripts()
+        ]
+        if len(scripts) == 1:
+            return scripts[0]
+        else:
+            return scripts
 
 
 def merge(config, revisions, message=None, branch_label=None, rev_id=None):
